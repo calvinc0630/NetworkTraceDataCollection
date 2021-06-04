@@ -4,7 +4,6 @@
 *.txt
 *.pdf
 
-
 # C complier
 *.cmd
 *.mod.c
@@ -31,3 +30,6 @@ venv/*
 
 # Variable config
 config/config_temp.json
+
+# Dep config
+!requirements.txt
