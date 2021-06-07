@@ -103,7 +103,7 @@ class TraceDataAnalyzer(object):
 
         mean_throughput_in_mbps = 0.0
         if test_result["direction"] == "download":
-            mean_throughput_in_mbps = np.mean(count_list)
+            mean_throughput_in_mbps = np.sum(count_list) / task_time
             # iperf
             #     mean_throughput_in_mbps = iperf_result["end"]["sum_received"]["bits_per_second"] / 1000000
 
