@@ -1,13 +1,10 @@
-import json
 import os
-import time
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
-from datetime import datetime, timezone
-import argparse
-
+from datetime import datetime
+import numpy as np
 import requests
 import utils
 
@@ -67,8 +64,8 @@ class TraceDataAnalyzer(object):
         # time_scale, 1 is second, 1000 is milli second, 60 is minutes
         test_result = utils.parse_config(os.path.join(
             test_result_path, "experiment_result.json"))
-        iperf_result = utils.parse_config(
-            os.path.join(test_result_path, "iperf_result.json"))
+        # iperf_result = utils.parse_config(
+        #     os.path.join(test_result_path, "iperf_result.json"))
         year, month, day, hour, minute, second = test_result["start_time"].split(
             "_")
         start_time_datetime = datetime(int(year), int(
@@ -78,12 +75,6 @@ class TraceDataAnalyzer(object):
                                 "time", "packet_size"], header=None, delimiter='\t')
         if df_result.shape[0] == 0:
             return False
-        mean_throughput_in_mbps = 0.0
-        if test_result["direction"] == "download":
-            if test_result["variant"] != 'udp':
-                mean_throughput_in_mbps = iperf_result["end"]["sum_received"]["bits_per_second"] / 1000000
-            else:
-                mean_throughput_in_mbps = iperf_result["end"]["sum"]["bits_per_second"] / 1000000
 
         pre_config_timescale = {"hour": 3600,
                                 "minute": 60, "second": 1, "millisecond": 0.001}
@@ -109,6 +100,13 @@ class TraceDataAnalyzer(object):
             x*8/(1000000*time_scale_unit), 3) for x in df_result["packet_size"].values]})  # throughput in Mbps
         x_plot = df_throughput["time"].values
         count_list = df_throughput["throughput"].values
+
+        mean_throughput_in_mbps = 0.0
+        if test_result["direction"] == "download":
+            mean_throughput_in_mbps = np.mean(count_list)
+            # iperf
+            #     mean_throughput_in_mbps = iperf_result["end"]["sum_received"]["bits_per_second"] / 1000000
+
         fig, axs = plt.subplots(nrows=1, ncols=1, **figure_config["single"])
         axs.bar(x=x_plot, height=count_list, width=0.8, label="Throughput")
         if mean_throughput_in_mbps != 0.0:
